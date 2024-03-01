@@ -1,0 +1,60 @@
+version: "3"
+services:
+  pg_master:
+    build: ./master
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=hamed
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=hamed
+      - PG_REP_USER=rep
+      - PG_REP_PASSWORD=123456
+    ports:
+      - "5432:5432"
+    command: ["postgres", "-c", "log_statement=all"]
+    networks:
+      default:
+        aliases:
+          - pg_cluster
+  pg_slave_1:
+    build: ./slave
+    environment:
+      - POSTGRES_USER=hamed
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=hamed
+      - PG_REP_USER=rep
+      - PG_REP_PASSWORD=123456
+      - PG_MASTER_HOST=pg_master
+    ports:
+      - "5430:5432"
+    user: "postgres"
+    command: ["postgres", "-c", "log_statement=all"]
+    networks:
+      default:
+        aliases:
+          - pg_cluster
+  pg_slave_2:
+    build: ./slave
+    environment:
+      - POSTGRES_USER=hamed
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=hamed
+      - PG_REP_USER=rep
+      - PG_REP_PASSWORD=123456
+      - PG_MASTER_HOST=pg_master
+    ports:
+      - "5431:5432"
+    user: "postgres"
+    command: ["postgres", "-c", "log_statement=all"]
+    networks:
+      default:
+        aliases:
+          - pg_cluster
+  nginx:
+    build: .
+    ports:
+      - "1111:1111"
+      - "2222:2222"
+volumes:
+  pg_data:
